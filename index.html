@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurant Opening Checklist</title>
+  <style>
+    :root {
+      --navy: #253549;
+      --espresso: #38241D;
+      --mimosa: #FAD02C;
+      --paper: #F6F3EC;
+      --white: #FFFEFB;
+      --muted: #827B70;
+      --line: #E7E1D5;
+      --serif: "Georgia", "Times New Roman", serif;
+      --sans: "Noto Sans JP", "Yu Gothic", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 85% 0%, rgba(250, 208, 44, .10), transparent 32rem), var(--paper);
+      color: var(--espresso);
+      font-family: var(--sans);
+      line-height: 1.8;
+    }
+
+    .page {
+      width: min(100% - 32px, 1080px);
+      margin: 0 auto;
+      padding: 50px 0 90px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: var(--navy);
+      color: white;
+      border-radius: 4px;
+      box-shadow: 0 22px 52px rgba(37, 53, 73, .12);
+      padding: clamp(28px, 6vw, 64px);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -80px;
+      top: -100px;
+      border: 1px solid rgba(250, 208, 44, .35);
+      border-radius: 50%;
+      box-shadow: 0 0 0 22px rgba(250, 208, 44, .035), 0 0 0 48px rgba(250, 208, 44, .025);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--mimosa);
+      font-family: var(--serif);
+      font-size: 1.12rem;
+      font-style: italic;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(2.7rem, 7vw, 5.2rem);
+      line-height: .95;
+      letter-spacing: -.03em;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 18px 0 0;
+      color: rgba(255,255,255,.78);
+      font-size: .9rem;
+      letter-spacing: .08em;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin: 22px 0 38px;
+    }
+
+    .save-state {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: .8rem;
+      letter-spacing: .04em;
+    }
+
+    .save-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--mimosa);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .action-btn {
+      padding: 8px 14px;
+      color: var(--navy);
+      background: transparent;
+      border: 1px solid rgba(37, 53, 73, .24);
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: .78rem;
+      transition: .2s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .schedule {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 30px 34px 24px;
+      margin-bottom: 58px;
+    }
+
+    .schedule-top {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 9px;
+    }
+
+    .schedule h2 {
+      margin: 0;
+      color: var(--navy);
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1.1;
+    }
+
+    .progress-copy {
+      color: var(--muted);
+      font-size: .78rem;
+      white-space: nowrap;
+    }
+
+    .progress-copy strong {
+      color: var(--navy);
+      font-size: 1.12rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-track {
+      height: 3px;
+      background: var(--line);
+      margin: 18px 0 23px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--mimosa);
+      transition: width .25s ease;
+    }
+
+    .schedule-note {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .phase-row {
+      display: grid;
+      grid-template-columns: 190px minmax(100px, 1fr) 64px;
+      align-items: center;
+      gap: 18px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .phase-name {
+      color: var(--espresso);
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .phase-days {
+      color: var(--muted);
+      font-size: .76rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(30, 1fr);
+      height: 8px;
+      background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 100%);
+      background-size: calc(100% / 30) 100%;
+    }
+
+    .bar {
+      grid-column: var(--start) / var(--end);
+      height: 8px;
+      background: var(--bar-color);
+    }
+
+    .bar.navy { --bar-color: var(--navy); }
+    .bar.espresso { --bar-color: var(--espresso); }
+    .bar.gold { --bar-color: #D8AB00; }
+
+    .timeline-axis {
+      display: grid;
+      grid-template-columns: 190px minmax(100px, 1fr) 64px;
+      gap: 18px;
+      margin-top: 9px;
+    }
+
+    .timeline-axis > div:nth-child(2) {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-family: var(--serif);
+      font-size: .88rem;
+    }
+
+    .sections {
+      display: grid;
+      gap: 22px;
+    }
+
+    .checklist-section {
+      --section-color: var(--navy);
+      display: grid;
+      grid-template-columns: 255px minmax(0, 1fr);
+      gap: 28px;
+      margin: 0;
+      padding: 28px 30px 24px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--section-color);
+      border-radius: 3px;
+    }
+
+    .checklist-section:nth-of-type(4n + 1) { --section-color: var(--navy); }
+    .checklist-section:nth-of-type(4n + 2) { --section-color: var(--espresso); }
+    .checklist-section:nth-of-type(4n + 3) { --section-color: #8D7100; }
+    .checklist-section:nth-of-type(4n + 4) { --section-color: var(--navy); }
+
+    .section-heading { padding-top: 2px; }
+
+    .phase-label {
+      margin: 0 0 5px;
+      color: var(--section-color);
+      font-family: var(--serif);
+      font-size: 1rem;
+      font-style: italic;
+      letter-spacing: .08em;
+    }
+
+    .section-heading h3 {
+      margin: 0;
+      color: var(--section-color);
+      font-family: var(--serif);
+      font-size: 1.9rem;
+      font-weight: 600;
+      line-height: 1.08;
+    }
+
+    .section-ja {
+      margin: 10px 0 0;
+      font-family: var(--serif);
+      font-size: .9rem;
+      letter-spacing: .03em;
+    }
+
+    .section-term {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: .75rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .task-list {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr) auto 28px;
+      align-items: start;
+      gap: 5px 13px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .task:last-child { border-bottom: 0; }
+
+    .task input[type="checkbox"] {
+      appearance: none;
+      width: 17px;
+      height: 17px;
+      margin: 5px 0 0;
+      border: 1px solid var(--section-color);
+      border-radius: 2px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .task input[type="checkbox"]:checked {
+      background: var(--section-color);
+    }
+
+    .task input[type="checkbox"]:checked::after {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 8px;
+      margin: 2px 0 0 5px;
+      border: solid var(--white);
+      border-width: 0 1.5px 1.5px 0;
+      transform: rotate(45deg);
+    }
+
+    .task-text {
+      min-width: 0;
+      outline: none;
+    }
+
+    .task input:checked ~ .task-text {
+      color: #9B958A;
+      text-decoration: line-through;
+      text-decoration-color: #C8C0B3;
+    }
+
+    .task-when {
+      min-width: 90px;
+      color: var(--section-color);
+      font-family: var(--serif);
+      font-size: .92rem;
+      line-height: 1.45;
+      text-align: right;
+      white-space: nowrap;
+      outline: none;
+    }
+
+    .task-when small {
+      display: block;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: .68rem;
+    }
+
+    .delete-task {
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      color: #A39B8F;
+      background: transparent;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      opacity: .55;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .delete-task:hover {
+      color: var(--espresso);
+      background: var(--paper);
+      opacity: 1;
+    }
+
+    .add-task {
+      margin-top: 12px;
+      padding: 6px 0;
+      color: var(--section-color);
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-size: .77rem;
+      letter-spacing: .03em;
+    }
+
+    .add-task:hover { text-decoration: underline; }
+
+    [contenteditable="true"]:focus {
+      background: rgba(250, 208, 44, .12);
+      outline: 1px dashed rgba(141, 113, 0, .45);
+      outline-offset: 2px;
+    }
+
+    .footer-note {
+      margin: 34px 0 0;
+      color: var(--muted);
+      font-size: .76rem;
+      text-align: center;
+      letter-spacing: .03em;
+    }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 28px, 600px); padding-top: 20px; }
+      .hero { padding: 34px 26px; }
+      .toolbar { margin: 16px 0 32px; }
+      .schedule { padding: 24px 20px 20px; margin-bottom: 40px; }
+      .schedule-top { align-items: start; flex-direction: column; gap: 7px; }
+      .phase-row { grid-template-columns: 1fr auto; gap: 7px 12px; }
+      .timeline { grid-column: 1 / -1; grid-row: 2; }
+      .phase-days { grid-column: 2; grid-row: 1; }
+      .timeline-axis { grid-template-columns: 1fr; }
+      .timeline-axis > div:first-child,
+      .timeline-axis > div:last-child { display: none; }
+      .checklist-section {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 22px 20px 18px;
+      }
+      .section-heading h3 { font-size: 1.75rem; }
+      .task { grid-template-columns: 18px minmax(0, 1fr) auto 22px; gap: 5px 9px; }
+      .task-when { min-width: 76px; font-size: .82rem; }
+    }
+
+    @media (max-width: 420px) {
+      .task { grid-template-columns: 18px minmax(0, 1fr) 22px; }
+      .task-when {
+        grid-column: 2;
+        text-align: left;
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+      }
+      .task-when small { display: inline; }
+      .delete-task { grid-column: 3; grid-row: 1; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .hero { box-shadow: none; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .toolbar, .add-task, .delete-task { display: none !important; }
+      .checklist-section, .schedule { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" id="app">
+    <header class="hero">
+      <p class="eyebrow" contenteditable="true">30-Day Launch Plan</p>
+      <h1 contenteditable="true">Restaurant<br>Opening Checklist</h1>
+      <p class="subtitle" contenteditable="true">飲食店 物件契約から開店までのチェックリスト</p>
+    </header>
+
+    <div class="toolbar">
+      <div class="save-state"><span class="save-dot"></span><span id="saveMessage">変更はこのブラウザに自動保存されます</span></div>
+      <div class="actions">
+        <button class="action-btn" type="button" id="printButton">印刷する</button>
+        <button class="action-btn" type="button" id="resetButton">初期状態に戻す</button>
+      </div>
+    </div>
+
+    <div class="schedule">
+      <div class="schedule-top">
+        <h2 contenteditable="true">Schedule at a glance</h2>
+        <div class="progress-copy"><strong id="progressCount">0 / 23</strong> タスク完了</div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <p class="schedule-note" contenteditable="true">開店日を D-0 とし、30日前から逆算 / Phases overlap and run in parallel</p>
+
+      <div class="phase-row">
+        <div class="phase-name" contenteditable="true">Phase 1 Contract</div>
+        <div class="timeline"><div class="bar navy" style="--start:1;--end:6"></div></div>
+        <div class="phase-days" contenteditable="true">5 days</div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-name" contenteditable="true">Phase 2 Construction</div>
+        <div class="timeline"><div class="bar espresso" style="--start:6;--end:17"></div></div>
+        <div class="phase-days" contenteditable="true">11 days</div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-name" contenteditable="true">Phase 3 Permits</div>
+        <div class="timeline"><div class="bar gold" style="--start:11;--end:20"></div></div>
+        <div class="phase-days" contenteditable="true">9 days</div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-name" contenteditable="true">Phase 4 Staff &amp; Promo</div>
+        <div class="timeline"><div class="bar navy" style="--start:17;--end:27"></div></div>
+        <div class="phase-days" contenteditable="true">10 days</div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-name" contenteditable="true">Phase 5 Final Check</div>
+        <div class="timeline"><div class="bar espresso" style="--start:24;--end:30"></div></div>
+        <div class="phase-days" contenteditable="true">8 days</div>
+      </div>
+      <div class="timeline-axis"><div></div><div><span>D-30</span><span>D-20</span><span>D-10</span><span>D-0 Open</span></div><div></div></div>
+    </div>
+
+    <div class="sections">
+      <section class="checklist-section">
+        <div class="section-heading">
+          <p class="phase-label" contenteditable="true">Phase 1</p>
+          <h3 contenteditable="true">Contract &amp;<br>Pre-Construction</h3>
+          <p class="section-ja" contenteditable="true">契約直後〜内装着工前</p>
+          <p class="section-term" contenteditable="true">D-30 – D-26 · 5 days</p>
+        </div>
+        <div>
+          <ul class="task-list">
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">内装・外装工事の業者選定と詳細見積もりの依頼、工事請負契約の締結</span><span class="task-when" contenteditable="true">D-30 – D-28<small>3 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">店舗デザイン、レイアウト、設備配置の最終決定</span><span class="task-when" contenteditable="true">D-28 – D-27<small>2 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">電気、ガス、水道、インターネットなどのインフラ契約および引き込み手続の開始</span><span class="task-when" contenteditable="true">D-30 – D-26<small>5 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+          </ul>
+          <button class="add-task" type="button">＋ タスクを追加</button>
+        </div>
+      </section>
+
+      <section class="checklist-section">
+        <div class="section-heading">
+          <p class="phase-label" contenteditable="true">Phase 2</p>
+          <h3 contenteditable="true">Construction</h3>
+          <p class="section-ja" contenteditable="true">工事期間中</p>
+          <p class="section-term" contenteditable="true">D-25 – D-15 · 11 days</p>
+        </div>
+        <div>
+          <ul class="task-list">
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">内装工事の着工および定期的な進捗確認</span><span class="task-when" contenteditable="true">D-25 – D-15<small>11 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">食品衛生責任者の資格取得（未取得の場合）</span><span class="task-when" contenteditable="true">D-25<small>1 day</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">保健所への飲食店営業許可の事前相談</span><span class="task-when" contenteditable="true">D-24<small>1 day</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">消防署への防火対象物使用開始届の提出</span><span class="task-when" contenteditable="true">D-18<small>1 day</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">深夜における酒類提供を行う場合の警察署への深夜酒類提供飲食店営業届出</span><span class="task-when" contenteditable="true">D-17<small>1 day</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+          </ul>
+          <button class="add-task" type="button">＋ タスクを追加</button>
+        </div>
+      </section>
+
+      <section class="checklist-section">
+        <div class="section-heading">
+          <p class="phase-label" contenteditable="true">Phase 3</p>
+          <h3 contenteditable="true">Permits &amp;<br>Procurement</h3>
+          <p class="section-ja" contenteditable="true">許認可・調達準備期間</p>
+          <p class="section-term" contenteditable="true">D-20 – D-12 · 9 days</p>
+        </div>
+        <div>
+          <ul class="task-list">
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">保健所への飲食店営業許可申請書類の提出</span><span class="task-when" contenteditable="true">D-14<small>1 day</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">調理器具、食器、厨房機器、テーブルウェア、POSレジ、制服、消耗品の購入</span><span class="task-when" contenteditable="true">D-20 – D-12<small>9 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">食材、飲料、酒類の卸業者選定と発注契約</span><span class="task-when" contenteditable="true">D-20 – D-15<small>6 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">メニュー内容の確定、原価計算、レシピの固定</span><span class="task-when" contenteditable="true">D-20 – D-14<small>7 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">火災保険、賠償責任保険などの各種損害保険への加入手続</span><span class="task-when" contenteditable="true">D-14 – D-12<small>3 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+          </ul>
+          <button class="add-task" type="button">＋ タスクを追加</button>
+        </div>
+      </section>
+
+      <section class="checklist-section">
+        <div class="section-heading">
+          <p class="phase-label" contenteditable="true">Phase 4</p>
+          <h3 contenteditable="true">Staffing &amp;<br>Promotion</h3>
+          <p class="section-ja" contenteditable="true">スタッフ採用・販促期間</p>
+          <p class="section-term" contenteditable="true">D-14 – D-5 · 10 days</p>
+        </div>
+        <div>
+          <ul class="task-list">
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">スタッフの募集、面接、採用手続</span><span class="task-when" contenteditable="true">D-14 – D-8<small>7 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">採用スタッフに対する接客マニュアル共有や調理トレーニングの実施</span><span class="task-when" contenteditable="true">D-10 – D-5<small>6 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">看板、外観サインの設置完了</span><span class="task-when" contenteditable="true">D-14 – D-9<small>6 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">チラシ、ショップカードの印刷、ホームページやSNSアカウントの開設および告知開始</span><span class="task-when" contenteditable="true">D-14 – D-5<small>10 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+          </ul>
+          <button class="add-task" type="button">＋ タスクを追加</button>
+        </div>
+      </section>
+
+      <section class="checklist-section">
+        <div class="section-heading">
+          <p class="phase-label" contenteditable="true">Phase 5</p>
+          <h3 contenteditable="true">Final Check &amp;<br>Pre-Open</h3>
+          <p class="section-ja" contenteditable="true">最終確認・プレオープン期</p>
+          <p class="section-term" contenteditable="true">D-7 – D-0 · 8 days</p>
+        </div>
+        <div>
+          <ul class="task-list">
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">保健所による現地検査の実施と営業許可書の受領</span><span class="task-when" contenteditable="true">D-7 – D-6<small>2 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">消防署による現地検査の実施</span><span class="task-when" contenteditable="true">D-6<small>1 day</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">プレオープン（知人や近隣住民を招待したオペレーション確認・リハーサル営業）の実施</span><span class="task-when" contenteditable="true">D-4 – D-3<small>2 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">プレオープンで得た課題の修正、オペレーションの最終調整</span><span class="task-when" contenteditable="true">D-3 – D-1<small>3 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">スタッフのシフト作成および最終確認</span><span class="task-when" contenteditable="true">D-4 – D-1<small>4 days</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+            <li class="task"><input type="checkbox"><span class="task-text" contenteditable="true">開店当日を迎える</span><span class="task-when" contenteditable="true">D-0<small>Open</small></span><button class="delete-task" type="button" aria-label="タスクを削除">×</button></li>
+          </ul>
+          <button class="add-task" type="button">＋ タスクを追加</button>
+        </div>
+      </section>
+    </div>
+
+    <p class="footer-note">テキストをクリックして編集できます。進捗と編集内容はこのブラウザに保存されます。</p>
+  </main>
+
+  <script>
+    (() => {
+      const app = document.getElementById("app");
+      const storageKey = "restaurant-opening-checklist-v2";
+      const initialContent = app.innerHTML;
+
+      try {
+        const savedContent = localStorage.getItem(storageKey);
+        if (savedContent) app.innerHTML = savedContent;
+      } catch (error) {
+        console.warn("保存データを読み込めませんでした。", error);
+      }
+
+      const save = () => {
+        try {
+          localStorage.setItem(storageKey, app.innerHTML);
+          const message = document.getElementById("saveMessage");
+          if (message) message.textContent = "変更を保存しました";
+        } catch (error) {
+          console.warn("変更を保存できませんでした。", error);
+        }
+        updateProgress();
+      };
+
+      const updateProgress = () => {
+        const boxes = [...app.querySelectorAll('.task input[type="checkbox"]')];
+        const done = boxes.filter(box => box.checked).length;
+        const count = document.getElementById("progressCount");
+        const fill = document.getElementById("progressFill");
+
+        if (count) count.textContent = `${done} / ${boxes.length}`;
+        if (fill) fill.style.width = boxes.length ? `${(done / boxes.length) * 100}%` : "0%";
+      };
+
+      app.addEventListener("input", event => {
+        if (event.target.isContentEditable) save();
+      });
+
+      app.addEventListener("change", event => {
+        if (event.target.matches('input[type="checkbox"]')) save();
+      });
+
+      app.addEventListener("click", event => {
+        const addButton = event.target.closest(".add-task");
+        if (addButton) {
+          const list = addButton.previousElementSibling;
+          const item = document.createElement("li");
+          item.className = "task";
+          item.innerHTML = `
+            <input type="checkbox">
+            <span class="task-text" contenteditable="true">新しいタスクを入力</span>
+            <span class="task-when" contenteditable="true">日程を入力<small>期間</small></span>
+            <button class="delete-task" type="button" aria-label="タスクを削除">×</button>
+          `;
+          list.appendChild(item);
+          save();
+          item.querySelector(".task-text").focus();
+          return;
+        }
+
+        const deleteButton = event.target.closest(".delete-task");
+        if (deleteButton) {
+          deleteButton.closest(".task").remove();
+          save();
+          return;
+        }
+
+        if (event.target.closest("#printButton")) {
+          window.print();
+          return;
+        }
+
+        if (event.target.closest("#resetButton")) {
+          if (confirm("チェック状態と編集内容を初期状態に戻します。よろしいですか？")) {
+            localStorage.removeItem(storageKey);
+            app.innerHTML = initialContent;
+            updateProgress();
+          }
+        }
+      });
+
+      updateProgress();
+    })();
+  </script>
+</body>
+</html>
